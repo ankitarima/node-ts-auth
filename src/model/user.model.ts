@@ -3,6 +3,19 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "config";
 
+export interface UserInput {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}
+
+export interface UserDocument extends UserInput, mongoose.Document {
+  createdAt: Date;
+  updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -30,14 +43,12 @@ const UserSchema = new mongoose.Schema({
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
 });
 
+UserSchema.index({ email: 1 });
+
 // middleware to hash password using bycryptjs
-UserSchema.pre("save", async function (next) {
+UserSchema.pre("save", async function (this: UserDocument) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
@@ -47,13 +58,16 @@ UserSchema.methods.getSignedJWT = function () {
   const JWT_SECRET = config.get<string>("JWT_SECRET");
   const JWT_EXPIRE = config.get<string>("JWT_EXPIRE");
   return jwt.sign({ id: this._id }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRE
+    expiresIn: JWT_EXPIRE,
   });
 };
 
 // Match passwords
-UserSchema.methods.matchPassword = async function (enteredPassword: string) {
-  return await bcrypt.compare(enteredPassword, this.password);
+UserSchema.methods.comparePassword = async function (
+  enteredPassword: string
+): Promise<boolean> {
+  const user = this as UserDocument;
+  return await bcrypt.compare(enteredPassword, user.password);
 };
 
-export default mongoose.model("User", UserSchema);
+export default mongoose.model<UserDocument>("User", UserSchema);

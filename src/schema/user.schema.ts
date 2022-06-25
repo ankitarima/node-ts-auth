@@ -23,6 +23,17 @@ export const userSchema = object({
   }),
 });
 
+export const loginUserSchema = object({
+  body: object({
+    email: string({
+      required_error: "Email is required",
+    }).email("Not a valid email"),
+    password: string({
+      required_error: "Password is required",
+    }).min(6, "Password is too short - should be min 6 chars")
+  })
+});
+
 export const verifyUserSchema = object({
   params: object({
     id: string(),
@@ -57,6 +68,8 @@ export const resetPasswordSchema = object({
 });
 
 export type userInput = TypeOf<typeof userSchema>["body"];
+
+export type loginUserInput = TypeOf<typeof loginUserSchema>["body"];
 
 export type VerifyUserInput = TypeOf<typeof verifyUserSchema>["params"];
 

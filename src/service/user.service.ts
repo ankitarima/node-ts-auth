@@ -1,7 +1,10 @@
-import asyncHandler from "../middleware/async.middleware";
-import UserModel from "../model/user.model";
+import User from "../model/user.model";
 
 
 export const createUser = async(data: any)=>{
-    return UserModel.create(data);
+    return User.create(data);
+}
+
+export const getUserByEmailWithPassword =async (email:any) => {
+    return User.findOne({email:email}).select('+password');
 }
