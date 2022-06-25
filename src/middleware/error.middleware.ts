@@ -5,9 +5,7 @@ import log from "../utils/logger.util";
 const errorHandler = ( err: any, req: Request, res: Response, next: NextFunction ) => {
 
   let error = { ...err };
-  console.log(err);
   
-
   log.error(err.message);
 
   error.message = err.message;

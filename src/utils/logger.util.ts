@@ -13,6 +13,9 @@ const log = logger({
     pid: false,
   },
   timestamp: () => `,"time":"${dayjs().format()}"`,
+  
 });
+
+logger.destination(`${__dirname}/../../logs/log_${dayjs().format('DD-MM-YYYY').toString()}.log`);
 
 export default log;
