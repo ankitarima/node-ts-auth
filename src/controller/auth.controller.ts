@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import asyncHandler from "../middleware/async.middleware";
-import userModel from "../model/user.model";
+import ErrorResponse from "../utils/error.util";
+import response from "../utils/response.util";
 import { loginUserInput, userInput } from "../schema/user.schema";
 import {
   createUser,
   getUserByEmailWithPassword,
 } from "../service/user.service";
-import ErrorResponse from "../utils/error.util";
-import response from "../utils/response.util";
 
 export const signup = asyncHandler(
   async (
@@ -34,7 +33,7 @@ export const login = asyncHandler(
     const user = await getUserByEmailWithPassword(body.email);
 
     if (!user) {
-      return next(new ErrorResponse("Invalid credentials.User not found", 401));
+      return next(new ErrorResponse("Invalid credentials", 401));
     }
 
     //Check for password
@@ -44,6 +43,19 @@ export const login = asyncHandler(
         return next(new ErrorResponse('Invalid credentials', 401))
     }
 
-    response(201, true, { user }, res);
+    //create token
+    const token = user.getSignedJWT();
+
+    const responseData = {
+      user:{
+        name: user.name,
+        email: user.email,
+        role: user.role
+      },
+      token
+    }
+
+    response(201, true, responseData, res);
+
   }
 );

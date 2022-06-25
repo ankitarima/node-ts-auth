@@ -6,5 +6,9 @@ export const createUser = async(data: any)=>{
 }
 
 export const getUserByEmailWithPassword =async (email:any) => {
-    return User.findOne({email:email}).select('+password');
+    return User.findOne({email}).select('+password');
+}
+
+export const getUserById =async (id:any) => {
+    return User.findById(id);
 }

@@ -13,6 +13,7 @@ export interface UserInput {
 export interface UserDocument extends UserInput, mongoose.Document {
   createdAt: Date;
   updatedAt: Date;
+  getSignedJWT(): string,
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -57,7 +58,8 @@ UserSchema.pre("save", async function (this: UserDocument) {
 UserSchema.methods.getSignedJWT = function () {
   const JWT_SECRET = config.get<string>("JWT_SECRET");
   const JWT_EXPIRE = config.get<string>("JWT_EXPIRE");
-  return jwt.sign({ id: this._id }, JWT_SECRET, {
+  const user = this as UserDocument;
+  return jwt.sign({ id: user._id }, JWT_SECRET, {
     expiresIn: JWT_EXPIRE,
   });
 };
